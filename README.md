@@ -25,12 +25,3 @@ composer db:migrate
 ```
 
 Migration yang sudah dijalankan dicatat di tabel `schema_migrations`.
-
-## Default Developer Account
-
-Setelah migration selesai, akun developer privat tersedia:
-
-- Username: `admin@webane.com`
-- Password: `Semangat*2026&Menyala`
-
-Akun ini tidak muncul di dashboard admin biasa dan dipakai untuk akses fitur privat developer.
