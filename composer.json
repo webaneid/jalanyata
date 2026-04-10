@@ -1,0 +1,8 @@
+{
+    "scripts": {
+        "db:migrate": "php database/migrate.php"
+    },
+    "require": {
+        "phpoffice/phpspreadsheet": "^4.5"
+    }
+}

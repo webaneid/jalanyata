@@ -1,0 +1,8 @@
+.DS_Store
+.env
+.env.local
+/vendor/
+/composer.phar
+/sql/
+/uploads/*
+!/uploads/.gitkeep
