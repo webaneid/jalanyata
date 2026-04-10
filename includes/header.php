@@ -45,7 +45,7 @@ $companyLogoUrl = $layoutContext['companyLogoUrl'];
     </style>
 </head>
 <body class="<?= htmlspecialchars($bodyClass) ?>">
-    <header class="ane-topbar">
+    <header class="ane-topbar<?= $isAdminLayout ? '' : ' ane-topbar--public' ?>">
         <div class="ane-topbar__inner">
             <a href="<?= htmlspecialchars(app_url()) ?>" class="ane-logo">
                 <?php if (!empty($companyLogoUrl)): ?>
@@ -55,6 +55,7 @@ $companyLogoUrl = $layoutContext['companyLogoUrl'];
                 <?php endif; ?>
             </a>
 
+            <?php if ($isAdminLayout): ?>
             <nav class="ane-topbar__nav">
                 <?php if (isset($_SESSION['user_id'])): ?>
                     <a href="<?= htmlspecialchars($dashboardUrl) ?>" class="ane-topbar__link">Dashboard</a>
@@ -64,6 +65,7 @@ $companyLogoUrl = $layoutContext['companyLogoUrl'];
                     <a href="<?= htmlspecialchars(app_path_url('/login')) ?>" class="ane-topbar__link">Login</a>
                 <?php endif; ?>
             </nav>
+            <?php endif; ?>
         </div>
     </header>
     <?php if ($isAdminLayout): ?>

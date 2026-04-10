@@ -70,13 +70,17 @@ body.ane-body::after {
 }
 
 .ane-topbar {
-  position: sticky;
-  top: 0;
-  z-index: 50;
   border-bottom: 1px solid rgba(255, 255, 255, 0.58);
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.92) 0%, rgba(219, 224, 230, 0.94) 14%, rgba(179, 185, 194, 0.92) 48%, rgba(246, 248, 251, 0.95) 100%);
   backdrop-filter: blur(24px);
   box-shadow: 0 16px 40px rgba(74, 79, 86, 0.2);
+}
+
+.ane-topbar--public {
+  border-bottom: 0;
+  background: transparent;
+  backdrop-filter: none;
+  box-shadow: none;
 }
 
 .ane-topbar__inner {
@@ -87,6 +91,10 @@ body.ane-body::after {
   align-items: center;
   justify-content: space-between;
   gap: 16px;
+}
+
+.ane-topbar--public .ane-topbar__inner {
+  justify-content: flex-start;
 }
 
 .ane-logo {
