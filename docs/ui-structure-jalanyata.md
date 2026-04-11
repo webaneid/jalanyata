@@ -58,13 +58,39 @@ Kontrak shell:
 - footer menutup wrapper shell
 - konten halaman berada di area `.ane-shell__main`
 
+### Public Shell
+
+Surface public dan verifikasi sekarang memakai shell yang lebih ringan:
+
+- header public hanya menampilkan logo/brand
+- header public tidak sticky
+- header public tidak membawa menu navigasi
+- background header public menyatu dengan kanvas halaman
+- bahasa visual public memakai tema silver terang, sedangkan tombol utama tetap dark-silver
+
+Kontrak shell public:
+
+- halaman public tidak menampilkan nav backoffice
+- halaman verifikasi valid/tidak valid dan landing page memakai bundle `css/public.min.css`
+- perubahan visual public harus menjaga konsistensi antar `home`, `dataasli`, dan `datatidakasli`
+
 ## Adopsi Bertahap
 
-Tahap awal adopsi dibatasi ke:
+Adopsi utama yang sudah selesai:
 
+- shell admin utama
 - dashboard admin
 - halaman produk admin
-- login admin
+- users
+- company
+- product photos
+- upload excel
 - landing page publik
+- halaman verifikasi valid/tidak valid
+- reader dashboard
 
-Halaman lain tetap berjalan dengan layout lama sampai dipindahkan secara eksplisit.
+Status saat ini:
+
+- admin dan public sudah memakai bundle CSS terpisah
+- JS produk admin dan reader juga sudah dipisah
+- boundary partial utama berada di `views/admin/` dan `views/reader/`

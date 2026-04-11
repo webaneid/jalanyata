@@ -12,6 +12,21 @@ Arsitektur yang dipakai bersifat **procedural PHP + server-rendered pages + endp
 
 Secara operasional, aplikasi ini cukup langsung dan mudah dipahami untuk skala kecil. Refactor fondasi sudah memperbaiki konfigurasi berbasis environment, guard auth, validasi upload, dan pemisahan asset utama. Namun, dari sisi maintainability, masih ada titik lemah pada layering, duplikasi query, dan coupling antarmodul.
 
+## Status Implementasi Terkini
+
+Status repository saat ini sudah lebih maju dibanding fase awal audit:
+
+- konfigurasi runtime sudah memakai `.env`
+- bundle UI sudah dipisah antara public dan admin
+- shell admin utama sudah dipecah ke partial view
+- helper domain sudah dipusatkan di `includes/`
+- password baru sudah memakai `password_hash()` / `password_verify()`
+- migration runner sederhana sudah tersedia di `database/migrate.php`
+- master ukuran produk sekarang disimpan di `product_photos` dengan `kodeukuran`, `product_weight`, dan `photo_url`
+- generator produk massal khusus role `developer` sudah tersedia
+- hasil generate produk bisa langsung diunduh sebagai ZIP QR HD dan Excel
+- deploy produksi aktif sudah diarahkan ke subdomain `cek.shafirsilver.com`
+
 ## Tujuan Sistem
 
 Sistem ini dibangun untuk mendukung use case verifikasi produk fisik, khususnya produk dengan identitas unik per item.
@@ -24,9 +39,10 @@ Kapabilitas utama:
 - Penampilan hasil verifikasi asli/tidak valid.
 - Pengelolaan katalog produk melalui panel admin.
 - Pengunggahan massal produk dari file Excel `.xlsx`.
-- Pengelolaan foto produk berdasarkan berat produk.
+- Pengelolaan master ukuran produk berdasarkan `kodeukuran`, ukuran, dan foto.
 - Pengelolaan identitas perusahaan dan logo.
-- Pengelolaan akun internal dengan role `admin` dan `reader`.
+- Pengelolaan akun internal dengan role `admin`, `reader`, dan `developer`.
+- Pembuatan produk massal berurutan dari master ukuran.
 - Pembuatan QR code di sisi browser untuk diunduh satuan maupun massal.
 
 ## Gaya Arsitektur
@@ -45,7 +61,6 @@ Tidak ditemukan:
 - Framework seperti Laravel, Symfony, Slim, CodeIgniter, atau sejenisnya.
 - Dependency Injection container.
 - ORM.
-- Migration tool.
 - Test suite.
 - Build pipeline frontend modern.
 
@@ -84,7 +99,9 @@ Tidak ditemukan:
 - `includes/admin_users.php`
   Helper query, pagination, URL domain user admin, dan handler action auth/user.
 - `includes/admin_product_photos.php`
-  Helper query domain foto produk dan handler action CRUD foto.
+  Helper query domain master ukuran produk dan handler action CRUD ukuran/foto.
+- `includes/system_seed.php`
+  Seed idempotent untuk akun developer privat.
 - `includes/layout_context.php`
   Helper bootstrap session/layout context untuk header dan footer.
 - `includes/header.php`
@@ -112,9 +129,13 @@ Tidak ditemukan:
 - `views/admin/users/`
   Partial page head, search form, form, list section, tabel, dan script user admin.
 - `views/admin/product_photos/`
-  Partial page head, form, list section, tabel, dan script foto produk.
+  Partial page head, form, list section, tabel, dan script master ukuran produk.
 - `views/admin/products/`
   Partial page head, search form, form, list section, toolbar, dan script halaman produk admin.
+- `views/admin/generate_products/`
+  Partial form generator produk massal.
+- `views/admin/generated_products_result/`
+  Partial hasil generate, tabel batch, dan tombol download QR/Excel.
 - `views/admin/upload_excel/`
   Partial page head, form, dan form section upload Excel.
 - `views/products/table.php`
@@ -133,7 +154,11 @@ Tidak ditemukan:
 - `admin/company.php`
   Kelola identitas perusahaan dan logo.
 - `admin/product_photos.php`
-  Kelola foto berdasarkan berat produk.
+  Kelola master ukuran produk (`kodeukuran`, ukuran, foto).
+- `admin/generate_products.php`
+  Generator produk massal khusus role `developer`.
+- `admin/generated_products_result.php`
+  Halaman hasil generate batch untuk unduh QR HD dan Excel.
 - `admin/upload_excel.php`
   Form import produk dari Excel.
 
@@ -145,7 +170,7 @@ Tidak ditemukan:
 ### API / action endpoints
 
 - `api/products.php`
-  Endpoint JSON verifikasi produk dan dispatcher mutasi produk ke helper domain.
+  Endpoint JSON verifikasi produk, dispatcher mutasi produk, generator batch, dan export Excel hasil generate.
 - `api/users.php`
   Dispatcher login dan CRUD user ke helper domain.
 - `api/company.php`
@@ -157,8 +182,10 @@ Tidak ditemukan:
 
 - `uploads/`
   Penyimpanan file upload logo dan foto produk.
-- `sql/u591451424_cekaurora.sql`
-  Dump database lengkap.
+- `database/`
+  Runner migrasi dan file SQL migration untuk install/update schema.
+- `sql/`
+  Dump historis lama dan tidak lagi menjadi workflow deploy utama.
 - `css/` dan `assets/`
   Aset styling dan sumber SCSS/gambar.
 - `vendor/`
@@ -195,6 +222,7 @@ Role yang terlihat di sistem:
 
 - `admin`
 - `reader`
+- `developer`
 
 Otorisasi utama sekarang dipusatkan melalui helper `jalanyata_require_role()`, walau implementasinya masih procedural di level file halaman dan endpoint.
 
@@ -254,8 +282,8 @@ Alur end-to-end:
 3. JavaScript di `views/home.php` mengarahkan browser ke `/cek/{kode}`.
 4. `index.php` menangkap pola route tersebut.
 5. `index.php` query tabel `products` berdasarkan `product_id_code`.
-6. Jika produk ada, sistem include `views/dataasli.php`.
-7. `views/dataasli.php` melakukan query tambahan ke `product_photos` berdasarkan `product_weight`.
+6. Jika produk ada, helper verifikasi mengambil data produk dan foto representatif dari master ukuran.
+7. Sistem include `views/dataasli.php`.
 8. Jika produk tidak ada, sistem include `views/datatidakasli.php`.
 
 Karakteristik alur ini:
@@ -275,6 +303,7 @@ Alur login:
 5. Jika hash lama masih `sha256`, login tetap diterima lalu password di-upgrade otomatis ke `password_hash()`.
 6. Jika valid:
    - role `admin` diarahkan ke `/dashboard`
+   - role `developer` diarahkan ke `/dashboard`
    - role `reader` diarahkan ke `/reader/dashboard.php`
 7. Jika gagal, pesan error disimpan di session dan user dikembalikan ke `/login`.
 
@@ -289,7 +318,7 @@ Alur utama:
 
 1. Admin membuka `admin/products.php`.
 2. Halaman memuat:
-   - filter berat dari `product_photos`
+   - filter berat dari data produk
    - data produk dengan search, filter, sort, dan pagination
    - semua kode produk untuk kebutuhan bulk QR download
 3. Form tambah/edit submit ke `api/products.php?action=add|edit`.
@@ -326,22 +355,43 @@ Karakteristik:
 - Tidak ada parser schema/templating yang lebih formal.
 - Tidak ada pembatasan ukuran file yang terlihat di level aplikasi.
 
-## 5. Alur manajemen foto produk
+## 5. Alur manajemen master ukuran produk
 
 Alur:
 
-1. Admin mengisi berat produk dan file gambar.
-2. `api/product_photos.php` memastikan berat belum dipakai saat add.
+1. Admin mengisi `kodeukuran`, ukuran, dan file gambar.
+2. `api/product_photos.php` memastikan `kodeukuran` belum dipakai saat add.
 3. File diupload ke `uploads/`.
 4. Record `product_photos` dibuat/diupdate.
 5. Saat delete atau edit dengan file baru, file lama berusaha dihapus dari disk.
 
 Model relasi bisnis yang dipakai:
 
-- satu berat produk memiliki satu foto representatif.
-- banyak record di `products` dapat mereferensikan satu foto melalui `product_weight`.
+- satu `kodeukuran` memiliki satu ukuran display dan satu foto representatif.
+- banyak record di `products` dapat memakai ukuran yang sama.
 
-## 6. Alur manajemen company profile
+## 6. Alur generate produk massal
+
+Alur:
+
+1. User dengan role `developer` membuka `admin/generate_products.php`.
+2. Form memilih ukuran dari master `product_photos`.
+3. Input generator:
+   - `kodeukuran`
+   - `production_code` format `MMYY`
+   - `start_sequence`
+   - `quantity`
+4. Sistem membentuk kode produk berurutan, misalnya `ASA04260001`.
+5. `product_date` otomatis dikonversi ke format display seperti `April 2026`.
+6. Batch insert dilakukan ke tabel `products`.
+7. Session menyimpan batch yang baru dibuat.
+8. User diarahkan ke `admin/generated_products_result.php`.
+9. Dari halaman hasil, user dapat:
+   - unduh semua QR code HD dalam satu ZIP
+   - unduh Excel hasil generate
+   - melihat tabel batch yang baru dibuat
+
+## 7. Alur manajemen company profile
 
 `admin/company.php` dan `api/company.php` mengelola satu record `company_info`.
 
@@ -385,23 +435,26 @@ Interpretasi domain:
 
 Peran:
 
-- peta satu foto representatif untuk satu kategori berat produk.
+- master ukuran produk dan foto representatifnya.
 
 Kolom:
 
 - `id`
+- `kodeukuran`
 - `product_weight`
 - `photo_url`
 
 Constraint:
 
 - primary key pada `id`
+- unique key pada `kodeukuran`
 - unique key pada `product_weight`
 
 Interpretasi domain:
 
-- `product_weight` berfungsi sebagai natural key.
-- relasi ke `products` bersifat implicit melalui string yang sama, bukan foreign key.
+- `kodeukuran` adalah identifier ukuran yang stabil.
+- `product_weight` dipakai sebagai label ukuran display.
+- relasi ke `products` masih bersifat implicit melalui nilai ukuran, bukan foreign key formal.
 
 ### `users`
 
@@ -426,6 +479,7 @@ Interpretasi domain:
 
 - autentikasi internal sederhana.
 - role disimpan langsung sebagai string.
+- akun `developer` bersifat privat dan tidak tampil pada list user admin biasa.
 
 ### `company_info`
 
@@ -451,7 +505,8 @@ Interpretasi domain:
 Relasi yang benar-benar dipakai aplikasi:
 
 - `products.product_id_code` dipakai untuk verifikasi publik.
-- `products.product_weight` dicocokkan dengan `product_photos.product_weight`.
+- `products.product_weight` masih dipakai sebagai label ukuran pada produk.
+- `product_photos.kodeukuran` menyimpan master kode ukuran untuk kebutuhan generator dan mesin berikutnya.
 - `users.role` menentukan dashboard tujuan dan akses fitur.
 - `company_info` dipakai global sebagai branding layer.
 
@@ -512,7 +567,7 @@ Beberapa keputusan desain yang tampak jelas:
 - Menjadikan `index.php` sebagai router sentral untuk jalur publik utama.
 - Menjadikan file `api/*.php` sebagai handler action, bukan API service murni.
 - Memakai session native untuk autentikasi.
-- Memakai string-based relation untuk memetakan berat produk ke foto.
+- Memakai master ukuran sederhana di `product_photos` tanpa foreign key formal.
 - Memakai filesystem lokal untuk media upload.
 - Memproses QR code di sisi client agar server tidak perlu menghasilkan image.
 
@@ -525,7 +580,7 @@ Keputusan-keputusan ini masuk akal untuk MVP atau aplikasi internal kecil, tetap
 - Struktur cukup mudah dipahami tanpa onboarding panjang.
 - Fitur bisnis inti sudah lengkap untuk skenario verifikasi produk.
 - Query penting umumnya sudah memakai prepared statements.
-- Unique constraint di database sudah membantu mencegah duplikasi `product_id_code`, `product_weight`, dan `username`.
+- Unique constraint di database sudah membantu mencegah duplikasi `product_id_code`, `kodeukuran`, `product_weight`, dan `username`.
 - Import Excel sudah terintegrasi langsung dengan data produk.
 - Branding perusahaan dapat diubah tanpa edit kode view.
 
@@ -664,9 +719,15 @@ Yang masih belum ada:
 - proteksi file executable terselubung
 - scanning keamanan file
 
-#### 9. Tidak ada migrasi dan test suite
+#### 9. Migration workflow sudah ada, tetapi masih sederhana
 
-Pengelolaan schema masih mengandalkan SQL dump. Ini menyulitkan perubahan skema bertahap dan repeatable deployment.
+Schema sekarang sudah bisa diinstal dan diupdate lewat:
+
+- `database/migrate.php`
+- `database/migrations/*.sql`
+- tabel `schema_migrations`
+
+Namun pendekatan ini masih berupa SQL migration sederhana dan belum punya rollback, seeding terpisah, atau test otomatis.
 
 ## Alur Modul Berdasarkan Layer Konseptual
 
@@ -714,13 +775,13 @@ Tanggung jawab:
 - `uploads/`
 - asset frontend
 - `vendor/`
-- SQL dump
+- migration SQL
 
 ## Estimasi Kompleksitas Operasional
 
 Untuk skala saat ini, aplikasi ini tergolong ringan:
 
-- deployment cukup copy file PHP + vendor + database + uploads.
+- deployment sekarang memakai Git + Composer + migration runner.
 - tidak ada worker, queue, cache layer, atau scheduler.
 - beban utama ada pada query database sederhana dan file serving statis.
 
@@ -736,7 +797,7 @@ Namun, karena semuanya menyatu, biaya perubahan naik cepat bila:
 
 Bagian ini mendokumentasikan kontrak konfigurasi yang berlaku saat ini dan residual step yang masih tersisa.
 
-### Topologi target yang diinginkan
+### Topologi target yang dipakai
 
 Environment yang ingin didukung:
 
@@ -905,9 +966,9 @@ Urutan prioritas yang paling penting:
 
 1. Pastikan production mewajibkan `.env` dan hilangkan fallback sensitif dari source bila tidak lagi dibutuhkan.
 2. Tuntaskan migrasi hash password legacy `sha256` dari database.
-3. Ubah relasi `product_weight` menjadi foreign key eksplisit atau setidaknya master table untuk berat produk.
-4. Tambahkan migration workflow.
-5. Tambahkan smoke test minimal untuk login, verifikasi, dan CRUD produk.
+3. Rapikan relasi ukuran produk dari string ke foreign key eksplisit bila domain sudah stabil.
+4. Tambahkan smoke test minimal untuk login, verifikasi, generator, dan CRUD produk.
+5. Tambahkan kontrol rollback atau migrasi turun bila kebutuhan deployment makin kompleks.
 
 ## Rekomendasi Refactor Bertahap
 
@@ -932,23 +993,23 @@ Pendekatan yang aman untuk project seperti ini adalah refactor bertahap, bukan r
 
 ### Tahap 3: Rapikan model domain
 
-- Buat master data berat produk.
-- Gunakan foreign key antar tabel.
-- Normalisasi field tanggal produksi bila memang seharusnya bertipe tanggal/bulan, bukan string bebas.
+- Selesai sebagian: master ukuran sederhana sudah hidup di `product_photos` melalui `kodeukuran`.
+- Belum selesai: foreign key formal antar tabel.
+- Belum selesai: normalisasi field tanggal produksi bila memang seharusnya bertipe tanggal/bulan, bukan string bebas.
 
 ### Tahap 4: Tingkatkan delivery engineering
 
-- Tambahkan migration tool.
-- Tambahkan smoke test minimal untuk login, verifikasi, dan CRUD produk.
-- Tambahkan konfigurasi per environment.
+- Selesai: migration runner sederhana sudah tersedia.
+- Selesai: konfigurasi per environment sudah tersedia lewat `.env`.
+- Belum selesai: smoke test minimal untuk login, verifikasi, generator, dan CRUD produk.
 
-## Kondisi Data pada Dump Saat Ini
+## Kondisi Data Historis
 
-Berdasarkan dump SQL yang ada:
+Berdasarkan dump historis lama yang masih tersimpan lokal saat audit awal:
 
 - `products` berisi sekitar 13.652 data.
-- `product_photos` berisi 9 data.
-- `users` berisi 1 user awal.
+- `product_photos` berisi 9 data ukuran.
+- `users` berisi 1 user awal sebelum seed developer ditambahkan.
 - `company_info` berisi 1 record.
 
 Ini mengindikasikan aplikasi dipakai untuk katalog kode produk individual dalam jumlah cukup besar, tetapi konfigurasi sistemnya sendiri masih sederhana.
@@ -963,4 +1024,4 @@ Secara singkat:
 - masalah utama: keamanan konfigurasi, duplikasi logika, otorisasi tidak konsisten, dan coupling antarmodul yang tinggi.
 - arah perbaikan terbaik: hardening dan modularisasi bertahap, bukan rewrite penuh.
 
-Dokumen ini menggambarkan **arsitektur aktual yang sedang berjalan** di repository saat analisa dilakukan, sehingga dapat dipakai sebagai baseline sebelum refactor berikutnya.
+Dokumen ini menggambarkan **arsitektur aktual yang sedang berjalan** di repository setelah refactor fondasi, pemisahan UI utama, penambahan migration workflow, dan implementasi generator produk developer.
