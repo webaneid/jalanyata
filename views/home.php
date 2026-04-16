@@ -2,7 +2,7 @@
     <div class="ane-hero__inner">
         <div class="ane-hero__grid">
             <section class="ane-hero__copy">
-                <p class="ane-hero__eyebrow">Aurora Silevera Authenticity Gateway</p>
+                <p class="ane-hero__eyebrow"><?= htmlspecialchars((string) $companyName, ENT_QUOTES, 'UTF-8') ?> Authenticity Gateway</p>
                 <h1 class="ane-hero__title">Cek Keaslian Fine Silver dengan Nuansa Metalik</h1>
                 <p class="ane-hero__lead">
                     Masukkan kode batang produk untuk memverifikasi keaslian silver Anda. Seluruh pengalaman dirancang dengan bahasa visual metalik yang tegas, elegan, dan konsisten dengan karakter premium produk silver.
@@ -32,7 +32,7 @@
 
             <aside class="ane-silver-specimen" aria-hidden="true">
                 <div class="ane-silver-specimen__frame">
-                    <p class="ane-silver-specimen__brand">SHAFIR</p>
+                    <p class="ane-silver-specimen__brand"><?= htmlspecialchars((string) $companyName, ENT_QUOTES, 'UTF-8') ?></p>
                     <p class="ane-silver-specimen__subtype">silver</p>
                     <p class="ane-silver-specimen__type">Authenticity Plate</p>
                     <div class="ane-silver-specimen__seal"></div>

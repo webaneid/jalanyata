@@ -25,7 +25,7 @@ $photo_url = $product['photo_url'] ?? null;
             <div class="ane-verify__plate">
                 <div class="ane-verify__plate-copy">
                     <p class="ane-verify__lead">
-                        Selamat, kode <span class="ane-verify__code"><?= htmlspecialchars($product['product_id_code']) ?></span> berhasil dicocokkan dengan data resmi Aurora Silevera.
+                        Selamat, kode <span class="ane-verify__code"><?= htmlspecialchars($product['product_id_code']) ?></span> berhasil dicocokkan dengan data resmi <?= htmlspecialchars((string) $companyName, ENT_QUOTES, 'UTF-8') ?>.
                     </p>
                     <div class="ane-verify__detail-grid">
                         <div class="ane-verify__detail-item">
@@ -53,7 +53,7 @@ $photo_url = $product['photo_url'] ?? null;
             </div>
 
             <p class="ane-verify__meta">
-                Informasi ini menjamin bahwa produk Anda telah terdaftar secara resmi di Aurora Silevera.
+                Informasi ini menjamin bahwa produk Anda telah terdaftar secara resmi di <?= htmlspecialchars((string) $companyName, ENT_QUOTES, 'UTF-8') ?>.
             </p>
             <div class="ane-verify__actions">
                 <a href="<?= app_path_url('/') ?>" class="ane-button ane-button--secondary">Cek Kode Lain</a>
