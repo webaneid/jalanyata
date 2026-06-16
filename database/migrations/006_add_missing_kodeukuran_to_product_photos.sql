@@ -1,0 +1,5 @@
+ALTER TABLE product_photos
+  ADD COLUMN IF NOT EXISTS kodeukuran VARCHAR(50) NOT NULL DEFAULT '' AFTER id;
+
+ALTER TABLE product_photos
+  ADD COLUMN IF NOT EXISTS category_id INT(11) NULL AFTER id;
