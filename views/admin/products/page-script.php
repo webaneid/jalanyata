@@ -1,6 +1,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script src="<?= app_path_url('/assets/js/product-qr-core.js') ?>"></script>
-<script src="<?= app_path_url('/assets/js/product-qr-admin.js') ?>"></script>
+<script src="<?= app_path_url('/assets/js/product-qr-core.js') ?>?v=<?= filemtime(dirname(__DIR__, 3) . '/assets/js/product-qr-core.js') ?>"></script>
+<script src="<?= app_path_url('/assets/js/product-qr-admin.js') ?>?v=<?= filemtime(dirname(__DIR__, 3) . '/assets/js/product-qr-admin.js') ?>"></script>
 <script>
     const adminProductPage = JalanyataProductQr.initAdminProductPage({
         verifyBaseUrl: '<?= $baseDomain ?>/cek',

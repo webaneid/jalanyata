@@ -16,6 +16,7 @@ $productSearchAction = app_path_url('/admin/products.php');
 $productListPath = '/admin/products.php';
 
 $weights = [];
+$productSizes = [];
 $products = [];
 $filters = jalanyata_product_filter_state(200);
 $page = $filters['page'];
@@ -30,6 +31,7 @@ try {
     $totalPages = $productPage['totalPages'];
     $allProducts = jalanyata_fetch_filtered_products($conn, $filters, 'product_id_code');
     $weights = jalanyata_fetch_product_weights($conn);
+    $productSizes = jalanyata_fetch_product_size_options($conn);
 } catch (PDOException $e) {
     echo "Error mengambil data produk: " . $e->getMessage();
 }

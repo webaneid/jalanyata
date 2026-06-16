@@ -11,6 +11,7 @@ if (!function_exists('jalanyata_product_filter_state')) {
         return [
             'searchQuery' => isset($_GET['search']) ? trim((string) $_GET['search']) : '',
             'weightFilter' => isset($_GET['weight']) ? trim((string) $_GET['weight']) : '',
+            'productFilter' => isset($_GET['product']) ? trim((string) $_GET['product']) : '',
             'sortOrder' => isset($_GET['sort']) ? trim((string) $_GET['sort']) : '',
             'page' => $page,
             'limit' => $limit,
@@ -108,6 +109,11 @@ if (!function_exists('jalanyata_product_filter_clauses')) {
             $params[':weightFilter'] = $filters['weightFilter'];
         }
 
+        if (($filters['productFilter'] ?? '') !== '') {
+            $whereClauses[] = 'product_id_code LIKE CONCAT(:productFilter, "%")';
+            $params[':productFilter'] = $filters['productFilter'];
+        }
+
         return [
             'where' => $whereClauses,
             'params' => $params,
@@ -124,6 +130,10 @@ if (!function_exists('jalanyata_product_order_by_clause')) {
 
         if ($sortOrder === 'desc') {
             return ' ORDER BY product_id_code DESC';
+        }
+
+        if ($sortOrder === 'newest') {
+            return ' ORDER BY id DESC';
         }
 
         return '';
@@ -724,6 +734,10 @@ if (!function_exists('jalanyata_product_filter_url')) {
             $query['weight'] = $filters['weightFilter'];
         }
 
+        if (($filters['productFilter'] ?? '') !== '') {
+            $query['product'] = $filters['productFilter'];
+        }
+
         if (($filters['sortOrder'] ?? '') !== '') {
             $query['sort'] = $filters['sortOrder'];
         }
@@ -752,9 +766,19 @@ if (!function_exists('jalanyata_product_page_url')) {
 }
 
 if (!function_exists('jalanyata_render_product_filter_controls')) {
-    function jalanyata_render_product_filter_controls($path, $filters, $weights)
+    function jalanyata_render_product_filter_controls($path, $filters, $weights, $productSizes = [])
     {
         $weightLabel = ($filters['weightFilter'] ?? '') !== '' ? $filters['weightFilter'] : 'Semua';
+        $productLabel = 'Semua Produk';
+
+        if (($filters['productFilter'] ?? '') !== '') {
+            foreach ($productSizes as $productSize) {
+                if (($productSize['kodeukuran'] ?? '') === $filters['productFilter']) {
+                    $productLabel = trim((string) ($productSize['category_name'] ?? '') . ' ' . (string) ($productSize['product_weight'] ?? '') . ' (' . (string) ($productSize['kodeukuran'] ?? '') . ')');
+                    break;
+                }
+            }
+        }
 
         echo '<div class="ane-dropdown">';
         echo '<button id="sort-btn" class="ane-button ane-button--secondary ane-dropdown__toggle">';
@@ -762,6 +786,7 @@ if (!function_exists('jalanyata_render_product_filter_controls')) {
         echo '<svg class="ane-dropdown__icon" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>';
         echo '</button>';
         echo '<div id="sort-dropdown" class="ane-dropdown__menu ane-hidden">';
+        echo '<a href="' . htmlspecialchars(jalanyata_product_filter_url($path, $filters, ['sort' => 'newest']), ENT_QUOTES, 'UTF-8') . '" class="ane-dropdown__item" role="menuitem">Newest</a>';
         echo '<a href="' . htmlspecialchars(jalanyata_product_filter_url($path, $filters, ['sort' => 'asc']), ENT_QUOTES, 'UTF-8') . '" class="ane-dropdown__item" role="menuitem">Kode ID (A-Z)</a>';
         echo '<a href="' . htmlspecialchars(jalanyata_product_filter_url($path, $filters, ['sort' => 'desc']), ENT_QUOTES, 'UTF-8') . '" class="ane-dropdown__item" role="menuitem">Kode ID (Z-A)</a>';
         echo '</div>';
@@ -776,6 +801,21 @@ if (!function_exists('jalanyata_render_product_filter_controls')) {
 
         foreach ($weights as $weight) {
             echo '<a href="' . htmlspecialchars(jalanyata_product_filter_url($path, $filters, ['weight' => $weight]), ENT_QUOTES, 'UTF-8') . '" class="ane-dropdown__item" role="menuitem">' . htmlspecialchars($weight, ENT_QUOTES, 'UTF-8') . '</a>';
+        }
+
+        echo '</div>';
+        echo '</div>';
+        echo '<div class="ane-dropdown">';
+        echo '<button id="product-filter-btn" class="ane-button ane-button--secondary ane-dropdown__toggle">';
+        echo 'Produk: ' . htmlspecialchars($productLabel, ENT_QUOTES, 'UTF-8');
+        echo '<svg class="ane-dropdown__icon" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>';
+        echo '</button>';
+        echo '<div id="product-dropdown" class="ane-dropdown__menu ane-hidden">';
+        echo '<a href="' . htmlspecialchars(jalanyata_product_filter_url($path, $filters, ['product' => '']), ENT_QUOTES, 'UTF-8') . '" class="ane-dropdown__item" role="menuitem">Semua Produk</a>';
+
+        foreach ($productSizes as $productSize) {
+            $productSizeLabel = trim((string) ($productSize['category_name'] ?? '') . ' ' . (string) ($productSize['product_weight'] ?? '') . ' (' . (string) ($productSize['kodeukuran'] ?? '') . ')');
+            echo '<a href="' . htmlspecialchars(jalanyata_product_filter_url($path, $filters, ['product' => $productSize['kodeukuran'] ?? '']), ENT_QUOTES, 'UTF-8') . '" class="ane-dropdown__item" role="menuitem">' . htmlspecialchars($productSizeLabel, ENT_QUOTES, 'UTF-8') . '</a>';
         }
 
         echo '</div>';

@@ -212,6 +212,8 @@ window.JalanyataProductQr = (() => {
         const sortDropdown = document.getElementById('sort-dropdown');
         const weightFilterBtn = document.getElementById('weight-filter-btn');
         const weightDropdown = document.getElementById('weight-dropdown');
+        const productFilterBtn = document.getElementById('product-filter-btn');
+        const productDropdown = document.getElementById('product-dropdown');
 
         if (sortBtn && sortDropdown) {
             sortBtn.addEventListener('click', () => {
@@ -225,6 +227,12 @@ window.JalanyataProductQr = (() => {
             });
         }
 
+        if (productFilterBtn && productDropdown) {
+            productFilterBtn.addEventListener('click', () => {
+                productDropdown.classList.toggle('ane-hidden');
+            });
+        }
+
         window.addEventListener('click', (e) => {
             if (sortBtn && sortDropdown && !sortBtn.contains(e.target) && !sortDropdown.contains(e.target)) {
                 sortDropdown.classList.add('ane-hidden');
@@ -232,6 +240,10 @@ window.JalanyataProductQr = (() => {
 
             if (weightFilterBtn && weightDropdown && !weightFilterBtn.contains(e.target) && !weightDropdown.contains(e.target)) {
                 weightDropdown.classList.add('ane-hidden');
+            }
+
+            if (productFilterBtn && productDropdown && !productFilterBtn.contains(e.target) && !productDropdown.contains(e.target)) {
+                productDropdown.classList.add('ane-hidden');
             }
         });
     }

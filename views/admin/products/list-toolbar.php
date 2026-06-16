@@ -4,6 +4,6 @@
         <button id="download-all-btn" class="ane-button">Download Semua (ZIP)</button>
     </div>
     <div class="ane-form-inline">
-        <?php jalanyata_render_product_filter_controls($productListPath, $filters, $weights); ?>
+        <?php jalanyata_render_product_filter_controls($productListPath, $filters, $weights, $productSizes); ?>
     </div>
 </div>
