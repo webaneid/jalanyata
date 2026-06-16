@@ -36,7 +36,7 @@ require_once __DIR__ . '/../includes/header.php';
     <section class="ane-page-head">
         <div>
             <h1 class="ane-page-head__title">Dashboard Admin</h1>
-            <p class="ane-page-head__meta">Ringkasan statistik dan akses cepat modul Jalanyata.</p>
+            <p class="ane-page-head__meta">Ringkasan statistik dan akses cepat modul <?= htmlspecialchars((string) $companyName, ENT_QUOTES, 'UTF-8') ?>.</p>
         </div>
     </section>
 

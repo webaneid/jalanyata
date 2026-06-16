@@ -23,6 +23,7 @@ Status repository saat ini sudah lebih maju dibanding fase awal audit:
 - password baru sudah memakai `password_hash()` / `password_verify()`
 - migration runner sederhana sudah tersedia di `database/migrate.php`
 - master ukuran produk sekarang disimpan di `product_photos` dengan `kodeukuran`, `product_weight`, dan `photo_url`
+- template copy front-end publik sekarang dipusatkan di `frontend_templates`
 - generator produk massal khusus role `developer` sudah tersedia
 - hasil generate produk bisa langsung diunduh sebagai ZIP QR HD dan Excel
 - deploy produksi aktif sudah diarahkan ke subdomain `cek.shafirsilver.com`
@@ -41,6 +42,7 @@ Kapabilitas utama:
 - Pengunggahan massal produk dari file Excel `.xlsx`.
 - Pengelolaan master ukuran produk berdasarkan `kodeukuran`, ukuran, dan foto.
 - Pengelolaan identitas perusahaan dan logo.
+- Pengelolaan template front-end publik dan copy verifikasi.
 - Pengelolaan akun internal dengan role `admin`, `reader`, dan `developer`.
 - Pembuatan produk massal berurutan dari master ukuran.
 - Pembuatan QR code di sisi browser untuk diunduh satuan maupun massal.
@@ -104,6 +106,8 @@ Tidak ditemukan:
   Seed idempotent untuk akun developer privat.
 - `includes/layout_context.php`
   Helper bootstrap session/layout context untuk header dan footer.
+- `includes/frontend_templates.php`
+  Helper preset template, copy, dan aktivasi template front-end publik.
 - `includes/header.php`
   Header global yang memakai helper layout context untuk bootstrap brand, metadata halaman, dan shell admin.
 - `includes/footer.php`
@@ -153,6 +157,8 @@ Tidak ditemukan:
   CRUD user admin/reader.
 - `admin/company.php`
   Kelola identitas perusahaan dan logo.
+- `admin/frontend.php`
+  Kelola template front-end publik dan editor copy halaman.
 - `admin/product_photos.php`
   Kelola master ukuran produk (`kodeukuran`, ukuran, foto).
 - `admin/generate_products.php`
@@ -204,6 +210,8 @@ Perilaku routing:
 - `/dashboard` memuat dashboard admin bila session valid.
 - `/cek/{kode}` melakukan lookup produk lalu merender halaman asli atau tidak valid.
 - selain route di atas menghasilkan `404`.
+
+Copy landing page dan halaman verifikasi dibaca dari `frontend_templates` melalui `includes/layout_context.php`, sehingga teks public bisa diubah dari admin tanpa edit view.
 
 Ini adalah router minimal berbasis `switch` dan regex. Ia tidak memiliki konsep middleware formal, grouping route, named route, atau handler abstraction.
 

@@ -1,5 +1,6 @@
 <!-- File: views/datatidakasli.php -->
 <!-- Fungsi: Tampilan untuk produk yang tidak terverifikasi -->
+<?php $verifyCopy = $frontendTemplateConfig ?? []; ?>
 <main class="ane-verify">
     <div class="ane-verify__shell">
         <section class="ane-verify__card ane-verify__card--danger">
@@ -11,40 +12,42 @@
                         </svg>
                     </div>
                     <div>
-                        <p class="ane-verify__eyebrow">Authenticity Failed</p>
-                        <h1 class="ane-verify__title">Kode Tidak Valid</h1>
+                        <p class="ane-verify__eyebrow"><?= htmlspecialchars((string) ($verifyCopy['invalid_eyebrow'] ?? ''), ENT_QUOTES, 'UTF-8') ?></p>
+                        <h1 class="ane-verify__title"><?= htmlspecialchars((string) ($verifyCopy['invalid_title'] ?? ''), ENT_QUOTES, 'UTF-8') ?></h1>
                     </div>
                 </div>
-                <div class="ane-verify__serial">Silver Check</div>
+                <div class="ane-verify__serial"><?= htmlspecialchars(jalanyata_frontend_template_replace_vars((string) ($verifyCopy['invalid_serial'] ?? ''), [
+                    '%company%' => (string) $companyName,
+                ]), ENT_QUOTES, 'UTF-8') ?></div>
             </div>
 
             <div class="ane-verify__plate">
                 <div class="ane-verify__plate-copy">
                     <p class="ane-verify__lead">
-                        Kode produk tidak ditemukan pada database resmi. Pastikan Anda memasukkan kode dengan benar sebelum melanjutkan pengecekan ulang.
+                        <?= htmlspecialchars((string) ($verifyCopy['invalid_lead'] ?? ''), ENT_QUOTES, 'UTF-8') ?>
                     </p>
                     <div class="ane-verify__detail-grid">
                         <div class="ane-verify__detail-item">
-                            <span>Status</span>
-                            <strong>Tidak Ditemukan</strong>
+                            <span><?= htmlspecialchars((string) ($verifyCopy['invalid_label_status'] ?? 'Status'), ENT_QUOTES, 'UTF-8') ?></span>
+                            <strong><?= htmlspecialchars((string) ($verifyCopy['invalid_detail_status_value'] ?? 'Tidak Ditemukan'), ENT_QUOTES, 'UTF-8') ?></strong>
                         </div>
                         <div class="ane-verify__detail-item">
-                            <span>Produk</span>
-                            <strong>Belum Terverifikasi</strong>
+                            <span><?= htmlspecialchars((string) ($verifyCopy['invalid_label_product'] ?? 'Produk'), ENT_QUOTES, 'UTF-8') ?></span>
+                            <strong><?= htmlspecialchars((string) ($verifyCopy['invalid_detail_product_value'] ?? 'Belum Terverifikasi'), ENT_QUOTES, 'UTF-8') ?></strong>
                         </div>
                         <div class="ane-verify__detail-item">
-                            <span>Tindakan</span>
-                            <strong>Periksa Kode Ulang</strong>
+                            <span><?= htmlspecialchars((string) ($verifyCopy['invalid_label_action'] ?? 'Tindakan'), ENT_QUOTES, 'UTF-8') ?></span>
+                            <strong><?= htmlspecialchars((string) ($verifyCopy['invalid_detail_action_value'] ?? 'Periksa Kode Ulang'), ENT_QUOTES, 'UTF-8') ?></strong>
                         </div>
                     </div>
                 </div>
             </div>
 
             <p class="ane-verify__meta">
-                Silakan coba lagi atau hubungi layanan pelanggan untuk bantuan lebih lanjut.
+                <?= htmlspecialchars((string) ($verifyCopy['invalid_meta'] ?? ''), ENT_QUOTES, 'UTF-8') ?>
             </p>
             <div class="ane-verify__actions">
-                <a href="<?= app_path_url('/') ?>" class="ane-button">Ulangi atau cek kode baru</a>
+                <a href="<?= app_path_url('/') ?>" class="ane-button"><?= htmlspecialchars((string) ($verifyCopy['invalid_back_button_label'] ?? 'Ulangi atau cek kode baru'), ENT_QUOTES, 'UTF-8') ?></a>
             </div>
         </section>
     </div>

@@ -73,6 +73,8 @@ Kontrak shell public:
 - halaman public tidak menampilkan nav backoffice
 - halaman verifikasi valid/tidak valid dan landing page memakai bundle `css/public.min.css`
 - perubahan visual public harus menjaga konsistensi antar `home`, `dataasli`, dan `datatidakasli`
+- copy public dibaca dari template aktif di `frontend_templates`
+- admin memiliki menu `Front-end` untuk memilih preset dan mengedit copy publik
 
 ## Adopsi Bertahap
 

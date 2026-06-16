@@ -1,10 +1,15 @@
 <?php
 
+require_once __DIR__ . '/categories.php';
+
 if (!function_exists('jalanyata_fetch_product_photos')) {
     function jalanyata_fetch_product_photos(PDO $conn)
     {
         return $conn->query(
-            'SELECT id, kodeukuran, product_weight, photo_url FROM product_photos ORDER BY kodeukuran ASC, product_weight ASC'
+            'SELECT pp.id, pp.category_id, c.name AS category_name, pp.kodeukuran, pp.product_weight, pp.photo_url
+             FROM product_photos pp
+             INNER JOIN categories c ON c.id = pp.category_id
+             ORDER BY c.name ASC, pp.product_weight ASC, pp.kodeukuran ASC'
         )->fetchAll(PDO::FETCH_ASSOC);
     }
 }
@@ -32,11 +37,12 @@ if (!function_exists('jalanyata_find_product_photo_url_by_id')) {
 }
 
 if (!function_exists('jalanyata_create_product_photo')) {
-    function jalanyata_create_product_photo(PDO $conn, $sizeCode, $productWeight, $photoUrl)
+    function jalanyata_create_product_photo(PDO $conn, $categoryId, $sizeCode, $productWeight, $photoUrl)
     {
         $stmt = $conn->prepare(
-            'INSERT INTO product_photos (kodeukuran, product_weight, photo_url) VALUES (:kodeukuran, :weight, :url)'
+            'INSERT INTO product_photos (category_id, kodeukuran, product_weight, photo_url) VALUES (:categoryId, :kodeukuran, :weight, :url)'
         );
+        $stmt->bindValue(':categoryId', (int) $categoryId, PDO::PARAM_INT);
         $stmt->bindValue(':kodeukuran', $sizeCode, PDO::PARAM_STR);
         $stmt->bindValue(':weight', $productWeight, PDO::PARAM_STR);
         $stmt->bindValue(':url', $photoUrl, PDO::PARAM_STR);
@@ -45,11 +51,12 @@ if (!function_exists('jalanyata_create_product_photo')) {
 }
 
 if (!function_exists('jalanyata_update_product_photo')) {
-    function jalanyata_update_product_photo(PDO $conn, $id, $sizeCode, $productWeight, $photoUrl)
+    function jalanyata_update_product_photo(PDO $conn, $id, $categoryId, $sizeCode, $productWeight, $photoUrl)
     {
         $stmt = $conn->prepare(
-            'UPDATE product_photos SET kodeukuran = :kodeukuran, product_weight = :weight, photo_url = :url WHERE id = :id'
+            'UPDATE product_photos SET category_id = :categoryId, kodeukuran = :kodeukuran, product_weight = :weight, photo_url = :url WHERE id = :id'
         );
+        $stmt->bindValue(':categoryId', (int) $categoryId, PDO::PARAM_INT);
         $stmt->bindValue(':kodeukuran', $sizeCode, PDO::PARAM_STR);
         $stmt->bindValue(':weight', $productWeight, PDO::PARAM_STR);
         $stmt->bindValue(':url', $photoUrl, PDO::PARAM_STR);
@@ -68,13 +75,14 @@ if (!function_exists('jalanyata_delete_product_photo')) {
 }
 
 if (!function_exists('jalanyata_handle_product_photo_add_request')) {
-    function jalanyata_handle_product_photo_add_request(PDO $conn, $sizeCode, $productWeight, $photoFile)
+    function jalanyata_handle_product_photo_add_request(PDO $conn, $categoryId, $sizeCode, $productWeight, $photoFile)
     {
+        $categoryId = (int) $categoryId;
         $sizeCode = strtoupper(trim((string) $sizeCode));
         $productWeight = trim((string) $productWeight);
 
-        if ($sizeCode === '' || $productWeight === '') {
-            jalanyata_flash_set('photo_error', 'Kode ukuran dan ukuran wajib diisi.');
+        if ($categoryId <= 0 || $sizeCode === '' || $productWeight === '') {
+            jalanyata_flash_set('photo_error', 'Kategori, kode ukuran, dan ukuran wajib diisi.');
             jalanyata_redirect('/admin/product_photos.php');
         }
 
@@ -90,6 +98,11 @@ if (!function_exists('jalanyata_handle_product_photo_add_request')) {
                 jalanyata_redirect('/admin/product_photos.php');
             }
 
+            if (!jalanyata_category_exists($conn, $categoryId)) {
+                jalanyata_flash_set('photo_error', 'Kategori tidak ditemukan.');
+                jalanyata_redirect('/admin/product_photos.php');
+            }
+
             if (jalanyata_product_photo_code_exists($conn, $sizeCode)) {
                 jalanyata_flash_set('photo_error', "Kode ukuran {$sizeCode} sudah ada.");
                 jalanyata_redirect('/admin/product_photos.php');
@@ -97,7 +110,7 @@ if (!function_exists('jalanyata_handle_product_photo_add_request')) {
 
             $photoUrl = jalanyata_store_uploaded_file($photoFile, $photoValidation['extension']);
             if ($photoUrl !== null) {
-                jalanyata_create_product_photo($conn, $sizeCode, $productWeight, $photoUrl);
+                jalanyata_create_product_photo($conn, $categoryId, $sizeCode, $productWeight, $photoUrl);
                 jalanyata_flash_set('photo_success', 'Foto produk berhasil ditambahkan.');
             } else {
                 jalanyata_flash_set('photo_error', 'Gagal memindahkan file yang diunggah.');
@@ -111,18 +124,24 @@ if (!function_exists('jalanyata_handle_product_photo_add_request')) {
 }
 
 if (!function_exists('jalanyata_handle_product_photo_edit_request')) {
-    function jalanyata_handle_product_photo_edit_request(PDO $conn, $id, $sizeCode, $productWeight, $photoFile = null)
+    function jalanyata_handle_product_photo_edit_request(PDO $conn, $id, $categoryId, $sizeCode, $productWeight, $photoFile = null)
     {
+        $categoryId = (int) $categoryId;
         $sizeCode = strtoupper(trim((string) $sizeCode));
         $productWeight = trim((string) $productWeight);
         $photoUrl = null;
 
-        if ($sizeCode === '' || $productWeight === '') {
-            jalanyata_flash_set('photo_error', 'Kode ukuran dan ukuran wajib diisi.');
+        if ($categoryId <= 0 || $sizeCode === '' || $productWeight === '') {
+            jalanyata_flash_set('photo_error', 'Kategori, kode ukuran, dan ukuran wajib diisi.');
             jalanyata_redirect('/admin/product_photos.php');
         }
 
         try {
+            if (!jalanyata_category_exists($conn, $categoryId)) {
+                jalanyata_flash_set('photo_error', 'Kategori tidak ditemukan.');
+                jalanyata_redirect('/admin/product_photos.php');
+            }
+
             if (is_array($photoFile) && ($photoFile['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE) {
                 $photoValidation = jalanyata_validate_image_upload($photoFile);
                 if (is_string($photoValidation)) {
@@ -143,7 +162,7 @@ if (!function_exists('jalanyata_handle_product_photo_edit_request')) {
                 $photoUrl = jalanyata_find_product_photo_url_by_id($conn, $id);
             }
 
-            jalanyata_update_product_photo($conn, $id, $sizeCode, $productWeight, $photoUrl);
+            jalanyata_update_product_photo($conn, $id, $categoryId, $sizeCode, $productWeight, $photoUrl);
             jalanyata_flash_set('photo_success', 'Foto produk berhasil diubah.');
         } catch (PDOException $e) {
             jalanyata_flash_set('photo_error', 'Terjadi kesalahan database: ' . $e->getMessage());

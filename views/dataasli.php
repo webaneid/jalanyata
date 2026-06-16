@@ -3,6 +3,8 @@
 // Fungsi: Tampilan untuk produk yang terverifikasi sebagai asli
 
 $photo_url = $product['photo_url'] ?? null;
+$verifyCopy = $frontendTemplateConfig ?? [];
+$isDarkVerifyTemplate = ($frontendTemplateKey ?? '') === 'silver-scan-dark';
 ?>
 <main class="ane-verify">
     <div class="ane-verify__shell">
@@ -15,8 +17,8 @@ $photo_url = $product['photo_url'] ?? null;
                         </svg>
                     </div>
                     <div>
-                        <p class="ane-verify__eyebrow">Authenticity Confirmed</p>
-                        <h1 class="ane-verify__title">Produk Silver Terverifikasi</h1>
+                        <p class="ane-verify__eyebrow"><?= htmlspecialchars((string) ($verifyCopy['verified_eyebrow'] ?? ''), ENT_QUOTES, 'UTF-8') ?></p>
+                        <h1 class="ane-verify__title"><?= htmlspecialchars((string) ($verifyCopy['verified_title'] ?? ''), ENT_QUOTES, 'UTF-8') ?></h1>
                     </div>
                 </div>
                 <div class="ane-verify__serial"><?= htmlspecialchars($product['product_id_code']) ?></div>
@@ -25,22 +27,50 @@ $photo_url = $product['photo_url'] ?? null;
             <div class="ane-verify__plate">
                 <div class="ane-verify__plate-copy">
                     <p class="ane-verify__lead">
-                        Selamat, kode <span class="ane-verify__code"><?= htmlspecialchars($product['product_id_code']) ?></span> berhasil dicocokkan dengan data resmi <?= htmlspecialchars((string) $companyName, ENT_QUOTES, 'UTF-8') ?>.
+                        <?= htmlspecialchars(jalanyata_frontend_template_replace_vars((string) ($verifyCopy['verified_lead'] ?? ''), [
+                            '%company%' => (string) $companyName,
+                            '%code%' => (string) $product['product_id_code'],
+                        ]), ENT_QUOTES, 'UTF-8') ?>
                     </p>
-                    <div class="ane-verify__detail-grid">
-                        <div class="ane-verify__detail-item">
-                            <span>Kode Produk</span>
-                            <strong><?= htmlspecialchars($product['product_id_code']) ?></strong>
+                    <?php if ($isDarkVerifyTemplate): ?>
+                        <div class="ane-verify__detail-list ane-verify__detail-list--verified">
+                            <div class="ane-verify__detail-row">
+                                <span class="ane-verify__detail-label"><?= htmlspecialchars((string) ($verifyCopy['verified_label_code'] ?? 'Kode Produk'), ENT_QUOTES, 'UTF-8') ?></span>
+                                <strong class="ane-verify__detail-value"><?= htmlspecialchars($product['product_id_code']) ?></strong>
+                            </div>
+                            <div class="ane-verify__detail-row">
+                                <span class="ane-verify__detail-label"><?= htmlspecialchars((string) ($verifyCopy['verified_label_category'] ?? 'Kategori Produk'), ENT_QUOTES, 'UTF-8') ?></span>
+                                <strong class="ane-verify__detail-value"><?= htmlspecialchars((string) ($product['category_name'] ?? '-'), ENT_QUOTES, 'UTF-8') ?></strong>
+                            </div>
+                            <div class="ane-verify__detail-row">
+                                <span class="ane-verify__detail-label"><?= htmlspecialchars((string) ($verifyCopy['verified_label_weight'] ?? 'Berat'), ENT_QUOTES, 'UTF-8') ?></span>
+                                <strong class="ane-verify__detail-value"><?= htmlspecialchars($product['product_weight']) ?></strong>
+                            </div>
+                            <div class="ane-verify__detail-row">
+                                <span class="ane-verify__detail-label"><?= htmlspecialchars((string) ($verifyCopy['verified_label_date'] ?? 'Tanggal Produksi'), ENT_QUOTES, 'UTF-8') ?></span>
+                                <strong class="ane-verify__detail-value"><?= htmlspecialchars($product['product_date']) ?></strong>
+                            </div>
                         </div>
-                        <div class="ane-verify__detail-item">
-                            <span>Berat</span>
-                            <strong><?= htmlspecialchars($product['product_weight']) ?></strong>
+                    <?php else: ?>
+                        <div class="ane-verify__detail-grid ane-verify__detail-grid--verified">
+                            <div class="ane-verify__detail-item">
+                                <span><?= htmlspecialchars((string) ($verifyCopy['verified_label_code'] ?? 'Kode Produk'), ENT_QUOTES, 'UTF-8') ?></span>
+                                <strong><?= htmlspecialchars($product['product_id_code']) ?></strong>
+                            </div>
+                            <div class="ane-verify__detail-item">
+                                <span><?= htmlspecialchars((string) ($verifyCopy['verified_label_category'] ?? 'Kategori Produk'), ENT_QUOTES, 'UTF-8') ?></span>
+                                <strong><?= htmlspecialchars((string) ($product['category_name'] ?? '-'), ENT_QUOTES, 'UTF-8') ?></strong>
+                            </div>
+                            <div class="ane-verify__detail-item">
+                                <span><?= htmlspecialchars((string) ($verifyCopy['verified_label_weight'] ?? 'Berat'), ENT_QUOTES, 'UTF-8') ?></span>
+                                <strong><?= htmlspecialchars($product['product_weight']) ?></strong>
+                            </div>
+                            <div class="ane-verify__detail-item">
+                                <span><?= htmlspecialchars((string) ($verifyCopy['verified_label_date'] ?? 'Tanggal Produksi'), ENT_QUOTES, 'UTF-8') ?></span>
+                                <strong><?= htmlspecialchars($product['product_date']) ?></strong>
+                            </div>
                         </div>
-                        <div class="ane-verify__detail-item">
-                            <span>Tanggal Produksi</span>
-                            <strong><?= htmlspecialchars($product['product_date']) ?></strong>
-                        </div>
-                    </div>
+                    <?php endif; ?>
                 </div>
 
                 <?php if ($photo_url): ?>
@@ -53,10 +83,12 @@ $photo_url = $product['photo_url'] ?? null;
             </div>
 
             <p class="ane-verify__meta">
-                Informasi ini menjamin bahwa produk Anda telah terdaftar secara resmi di <?= htmlspecialchars((string) $companyName, ENT_QUOTES, 'UTF-8') ?>.
+                <?= htmlspecialchars(jalanyata_frontend_template_replace_vars((string) ($verifyCopy['verified_meta'] ?? ''), [
+                    '%company%' => (string) $companyName,
+                ]), ENT_QUOTES, 'UTF-8') ?>
             </p>
             <div class="ane-verify__actions">
-                <a href="<?= app_path_url('/') ?>" class="ane-button ane-button--secondary">Cek Kode Lain</a>
+                <a href="<?= app_path_url('/') ?>" class="ane-button ane-button--secondary"><?= htmlspecialchars((string) ($verifyCopy['verified_back_button_label'] ?? 'Cek Kode Lain'), ENT_QUOTES, 'UTF-8') ?></a>
             </div>
         </section>
     </div>

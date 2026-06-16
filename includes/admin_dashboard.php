@@ -37,7 +37,8 @@ if (!function_exists('jalanyata_dashboard_shortcut_links')) {
             ['/admin/users.php', 'Kelola User', 'Tambah atau edit akun admin.'],
             ['/admin/upload_excel.php', 'Upload Data Produk', 'Import data produk dari file Excel.'],
             ['/admin/company.php', 'Kelola Perusahaan', 'Atur data dan logo perusahaan.'],
-            ['/admin/product_photos.php', 'Kelola Foto Produk', 'Atur foto produk berdasarkan berat.'],
+            ['/admin/frontend.php', 'Kelola Front-end', 'Atur template dan copy tampilan publik.'],
+            ['/admin/product_photos.php', 'Kelola Foto Produk', 'Atur foto produk berdasarkan kategori dan ukuran.'],
         ];
 
         if ($currentRole === 'developer') {

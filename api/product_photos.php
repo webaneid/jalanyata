@@ -16,6 +16,7 @@ if ($requestMethod === 'POST') {
     if ($action === 'add') {
         jalanyata_handle_product_photo_add_request(
             $conn,
+            $_POST['category_id'] ?? '',
             $_POST['kodeukuran'] ?? '',
             $_POST['product_weight'] ?? '',
             $_FILES['photo_file'] ?? null
@@ -24,6 +25,7 @@ if ($requestMethod === 'POST') {
         jalanyata_handle_product_photo_edit_request(
             $conn,
             $_POST['id'] ?? '',
+            $_POST['category_id'] ?? '',
             $_POST['kodeukuran'] ?? '',
             $_POST['product_weight'] ?? '',
             $_FILES['photo_file'] ?? null

@@ -28,6 +28,11 @@ $adminLinks = [
         'match' => ['/admin/company.php'],
     ],
     [
+        'label' => 'Front-end',
+        'href' => app_path_url('/admin/frontend.php'),
+        'match' => ['/admin/frontend.php'],
+    ],
+    [
         'label' => 'Users',
         'href' => app_path_url('/admin/users.php'),
         'match' => ['/admin/users.php'],

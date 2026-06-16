@@ -11,10 +11,13 @@ $pageTitle = 'Kelola Foto Produk';
 $productPhotoCreateAction = app_path_url('/api/product_photos.php?action=add');
 $productPhotoEditAction = app_path_url('/api/product_photos.php?action=edit');
 $productPhotoDeleteAction = app_path_url('/api/product_photos.php?action=delete');
+$categoryCreateAction = app_path_url('/api/categories.php?action=add');
 
 $photos = [];
+$categories = [];
 try {
     $photos = jalanyata_fetch_product_photos($conn);
+    $categories = jalanyata_fetch_categories($conn);
 } catch (PDOException $e) {
     echo "Error mengambil data foto produk: " . $e->getMessage();
 }

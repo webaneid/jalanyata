@@ -46,7 +46,11 @@ switch ($requestMethod) {
             $product = jalanyata_find_product_by_code($conn, $productIdCode);
 
             if ($product) {
-                $photoUrl = jalanyata_find_product_photo_url_by_weight($conn, $product['product_weight']);
+                $photoUrl = jalanyata_find_product_photo_url_by_product_code(
+                    $conn,
+                    $product['product_id_code'],
+                    $product['product_weight']
+                );
 
                 $response['success'] = true;
                 $response['message'] = 'Verifikasi berhasil!';
@@ -98,8 +102,9 @@ switch ($requestMethod) {
             jalanyata_require_role('developer');
             jalanyata_handle_product_generate_request(
                 $conn,
+                $_POST['category_id'] ?? '',
+                $_POST['size_id'] ?? '',
                 $_POST['kodeukuran'] ?? '',
-                $_POST['product_weight'] ?? '',
                 $_POST['production_code'] ?? '',
                 $_POST['start_sequence'] ?? '',
                 $_POST['quantity'] ?? ''

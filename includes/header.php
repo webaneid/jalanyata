@@ -22,6 +22,9 @@ $layoutStylesheet = $layoutContext['layoutStylesheet'];
 $dashboardUrl = $layoutContext['dashboardUrl'];
 $companyName = $layoutContext['companyName'];
 $companyLogoUrl = $layoutContext['companyLogoUrl'];
+$frontendTemplateKey = $layoutContext['frontendTemplateKey'];
+$frontendTemplateName = $layoutContext['frontendTemplateName'];
+$frontendTemplateConfig = $layoutContext['frontendTemplateConfig'];
 
 ?>
 <!DOCTYPE html>
@@ -33,11 +36,15 @@ $companyLogoUrl = $layoutContext['companyLogoUrl'];
     <meta name="description" content="<?= htmlspecialchars($pageDescription) ?>">
     <meta property="og:title" content="<?= htmlspecialchars($pageTitle) ?>">
     <meta property="og:description" content="<?= htmlspecialchars($pageDescription) ?>">
-    <meta property="og:image" content="<?= htmlspecialchars($ogImage) ?>">
     <meta property="og:url" content="<?= htmlspecialchars(app_url()) ?>">
     <meta property="og:type" content="website">
+    <?php if (!empty($ogImage)): ?>
+    <meta property="og:image" content="<?= htmlspecialchars($ogImage) ?>">
+    <?php endif; ?>
 
-    <link rel="icon" type="image/png" href="<?= htmlspecialchars(app_path_url('/assets/images/favicon.png')) ?>">
+    <?php if (!empty($companyLogoUrl)): ?>
+    <link rel="icon" type="image/png" href="<?= htmlspecialchars($companyLogoUrl) ?>">
+    <?php endif; ?>
     <link rel="stylesheet" href="<?= htmlspecialchars(app_path_url($layoutStylesheet)) ?>">
 
     <style>
@@ -49,7 +56,7 @@ $companyLogoUrl = $layoutContext['companyLogoUrl'];
         <div class="ane-topbar__inner">
             <a href="<?= htmlspecialchars(app_url()) ?>" class="ane-logo">
                 <?php if (!empty($companyLogoUrl)): ?>
-                    <img src="<?= htmlspecialchars($companyLogoUrl) ?>" alt="Logo Perusahaan" class="ane-logo__image">
+                    <img src="<?= htmlspecialchars($companyLogoUrl) ?>" alt="<?= htmlspecialchars($companyName) ?>" class="ane-logo__image">
                 <?php else: ?>
                     <span><?= htmlspecialchars($companyName) ?></span>
                 <?php endif; ?>
@@ -73,7 +80,7 @@ $companyLogoUrl = $layoutContext['companyLogoUrl'];
         <aside class="ane-shell__sidebar">
             <div class="ane-shell__sidebar-head">
                 <div class="ane-shell__eyebrow">Backoffice</div>
-                <div class="ane-shell__title">Jalanyata Admin</div>
+                <div class="ane-shell__title"><?= htmlspecialchars($companyName) ?> Admin</div>
             </div>
             <?php require __DIR__ . '/admin_nav.php'; ?>
         </aside>

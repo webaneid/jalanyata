@@ -2,6 +2,7 @@
     <table class="ane-table">
         <thead>
             <tr>
+                <th scope="col">Kategori</th>
                 <th scope="col">Kode Ukuran</th>
                 <th scope="col">Ukuran</th>
                 <th scope="col">Foto</th>
@@ -12,10 +13,12 @@
             <?php foreach ($photos as $photo): ?>
                 <tr
                     data-id="<?= (int) $photo['id'] ?>"
+                    data-category-id="<?= (int) $photo['category_id'] ?>"
                     data-code="<?= htmlspecialchars((string) $photo['kodeukuran'], ENT_QUOTES, 'UTF-8') ?>"
                     data-weight="<?= htmlspecialchars((string) $photo['product_weight'], ENT_QUOTES, 'UTF-8') ?>"
                     data-photo-url="<?= htmlspecialchars((string) $photo['photo_url'], ENT_QUOTES, 'UTF-8') ?>"
                 >
+                    <td><?= htmlspecialchars((string) $photo['category_name'], ENT_QUOTES, 'UTF-8') ?></td>
                     <td><?= htmlspecialchars((string) $photo['kodeukuran'], ENT_QUOTES, 'UTF-8') ?></td>
                     <td><?= htmlspecialchars((string) $photo['product_weight'], ENT_QUOTES, 'UTF-8') ?></td>
                     <td>

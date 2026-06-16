@@ -8,9 +8,11 @@ require_once __DIR__ . '/../config/database.php';
 $layoutMode = 'admin';
 $pageTitle = 'Generate Produk Massal';
 $generateProductsAction = app_path_url('/api/products.php?action=generate');
+$categories = [];
 $sizeOptions = [];
 
 try {
+    $categories = jalanyata_fetch_categories($conn);
     $sizeOptions = jalanyata_fetch_product_size_options($conn);
 } catch (PDOException $e) {
     echo 'Error mengambil master ukuran: ' . $e->getMessage();

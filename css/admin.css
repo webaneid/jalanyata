@@ -260,6 +260,14 @@ body.ane-body {
   align-items: center;
 }
 
+.ane-form-inline--stretch {
+  align-items: stretch;
+}
+
+.ane-form-inline--stretch > .ane-select {
+  flex: 1;
+}
+
 .ane-field {
   display: flex;
   flex-direction: column;
@@ -329,6 +337,12 @@ body.ane-body {
 
 .ane-button--secondary:hover {
   background: #cbd5e1;
+}
+
+.ane-button--compact {
+  min-height: 46px;
+  padding: 0 14px;
+  white-space: nowrap;
 }
 
 .ane-button--danger {
@@ -488,6 +502,39 @@ body.ane-body {
 
 .ane-hidden {
   display: none !important;
+}
+
+.ane-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.ane-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.56);
+}
+
+.ane-modal__dialog {
+  position: relative;
+  z-index: 1;
+  width: min(520px, 100%);
+  padding: 24px;
+  border-radius: var(--ane-radius-lg);
+  background: var(--ane-bg-panel);
+  box-shadow: var(--ane-shadow-panel);
+}
+
+.ane-modal__title {
+  margin: 0 0 10px;
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--ane-text-primary);
 }
 
 .ane-media-thumb {
@@ -652,5 +699,3 @@ body.ane-body {
     flex-wrap: wrap;
   }
 }
-
-/*# sourceMappingURL=admin.css.map */

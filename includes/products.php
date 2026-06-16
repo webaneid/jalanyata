@@ -1,5 +1,7 @@
 <?php
 
+require_once __DIR__ . '/categories.php';
+
 if (!function_exists('jalanyata_product_filter_state')) {
     function jalanyata_product_filter_state($defaultLimit)
     {
@@ -21,7 +23,10 @@ if (!function_exists('jalanyata_fetch_product_size_options')) {
     function jalanyata_fetch_product_size_options(PDO $conn)
     {
         return $conn->query(
-            'SELECT id, kodeukuran, product_weight, photo_url FROM product_photos ORDER BY id ASC'
+            'SELECT pp.id, pp.category_id, c.name AS category_name, pp.kodeukuran, pp.product_weight, pp.photo_url
+             FROM product_photos pp
+             INNER JOIN categories c ON c.id = pp.category_id
+             ORDER BY c.name ASC, pp.product_weight ASC, pp.kodeukuran ASC'
         )->fetchAll(PDO::FETCH_ASSOC);
     }
 }
@@ -57,9 +62,30 @@ if (!function_exists('jalanyata_find_product_size_by_code')) {
     function jalanyata_find_product_size_by_code(PDO $conn, $sizeCode)
     {
         $stmt = $conn->prepare(
-            'SELECT id, kodeukuran, product_weight, photo_url FROM product_photos WHERE kodeukuran = :kodeukuran LIMIT 1'
+            'SELECT pp.id, pp.category_id, c.name AS category_name, pp.kodeukuran, pp.product_weight, pp.photo_url
+             FROM product_photos pp
+             INNER JOIN categories c ON c.id = pp.category_id
+             WHERE pp.kodeukuran = :kodeukuran
+             LIMIT 1'
         );
         $stmt->bindValue(':kodeukuran', strtoupper(trim((string) $sizeCode)), PDO::PARAM_STR);
+        $stmt->execute();
+
+        return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+    }
+}
+
+if (!function_exists('jalanyata_find_product_size_by_id')) {
+    function jalanyata_find_product_size_by_id(PDO $conn, $sizeId)
+    {
+        $stmt = $conn->prepare(
+            'SELECT pp.id, pp.category_id, c.name AS category_name, pp.kodeukuran, pp.product_weight, pp.photo_url
+             FROM product_photos pp
+             INNER JOIN categories c ON c.id = pp.category_id
+             WHERE pp.id = :id
+             LIMIT 1'
+        );
+        $stmt->bindValue(':id', (int) $sizeId, PDO::PARAM_INT);
         $stmt->execute();
 
         return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
@@ -184,9 +210,25 @@ if (!function_exists('jalanyata_find_verified_product_by_code')) {
     function jalanyata_find_verified_product_by_code(PDO $conn, $productIdCode)
     {
         $stmt = $conn->prepare(
-            'SELECT p.id, p.product_id_code, p.product_weight, p.product_date, pp.photo_url
+            'SELECT p.id, p.product_id_code, p.product_weight, p.product_date,
+                    (
+                        SELECT pp.photo_url
+                        FROM product_photos pp
+                        WHERE pp.product_weight = p.product_weight
+                          AND p.product_id_code LIKE CONCAT(pp.kodeukuran, "%")
+                        ORDER BY CHAR_LENGTH(pp.kodeukuran) DESC
+                        LIMIT 1
+                    ) AS photo_url,
+                    (
+                        SELECT c.name
+                        FROM product_photos pp
+                        INNER JOIN categories c ON c.id = pp.category_id
+                        WHERE pp.product_weight = p.product_weight
+                          AND p.product_id_code LIKE CONCAT(pp.kodeukuran, "%")
+                        ORDER BY CHAR_LENGTH(pp.kodeukuran) DESC
+                        LIMIT 1
+                    ) AS category_name
              FROM products p
-             LEFT JOIN product_photos pp ON pp.product_weight = p.product_weight
              WHERE p.product_id_code = :code
              LIMIT 1'
         );
@@ -202,6 +244,27 @@ if (!function_exists('jalanyata_find_product_photo_url_by_weight')) {
     {
         $stmt = $conn->prepare('SELECT photo_url FROM product_photos WHERE product_weight = :weight');
         $stmt->bindValue(':weight', $productWeight, PDO::PARAM_STR);
+        $stmt->execute();
+
+        $photoUrl = $stmt->fetchColumn();
+
+        return $photoUrl === false ? null : $photoUrl;
+    }
+}
+
+if (!function_exists('jalanyata_find_product_photo_url_by_product_code')) {
+    function jalanyata_find_product_photo_url_by_product_code(PDO $conn, $productIdCode, $productWeight)
+    {
+        $stmt = $conn->prepare(
+            'SELECT photo_url
+             FROM product_photos
+             WHERE product_weight = :weight
+               AND :code LIKE CONCAT(kodeukuran, "%")
+             ORDER BY CHAR_LENGTH(kodeukuran) DESC
+             LIMIT 1'
+        );
+        $stmt->bindValue(':weight', $productWeight, PDO::PARAM_STR);
+        $stmt->bindValue(':code', $productIdCode, PDO::PARAM_STR);
         $stmt->execute();
 
         $photoUrl = $stmt->fetchColumn();
@@ -581,18 +644,23 @@ if (!function_exists('jalanyata_handle_product_upload_request')) {
 }
 
 if (!function_exists('jalanyata_handle_product_generate_request')) {
-    function jalanyata_handle_product_generate_request(PDO $conn, $sizeCode, $productWeight, $productionCode, $startSequence, $quantity)
+    function jalanyata_handle_product_generate_request(PDO $conn, $categoryId, $sizeId, $sizeCode, $productionCode, $startSequence, $quantity)
     {
         try {
-            $size = jalanyata_find_product_size_by_code($conn, $sizeCode);
+            $categoryId = (int) $categoryId;
+            $size = jalanyata_find_product_size_by_id($conn, $sizeId);
             if ($size === null) {
-                jalanyata_flash_set('generator_error', 'Kode ukuran tidak ditemukan.');
+                jalanyata_flash_set('generator_error', 'Master ukuran tidak ditemukan.');
                 jalanyata_redirect('/admin/generate_products.php');
             }
 
-            $selectedWeight = trim((string) $productWeight);
-            if ($selectedWeight === '' || $selectedWeight !== (string) $size['product_weight']) {
-                jalanyata_flash_set('generator_error', 'Ukuran tidak cocok dengan kode ukuran yang dipilih.');
+            if ($categoryId <= 0 || $categoryId !== (int) $size['category_id']) {
+                jalanyata_flash_set('generator_error', 'Kategori tidak cocok dengan master ukuran yang dipilih.');
+                jalanyata_redirect('/admin/generate_products.php');
+            }
+
+            if (strtoupper(trim((string) $sizeCode)) !== (string) $size['kodeukuran']) {
+                jalanyata_flash_set('generator_error', 'Kode ukuran tidak cocok dengan master ukuran yang dipilih.');
                 jalanyata_redirect('/admin/generate_products.php');
             }
 

@@ -12,7 +12,7 @@ require_once __DIR__ . '/../includes/header.php';
 <main class="ane-login">
     <div class="ane-panel ane-panel--padded ane-login__card">
         <h2 class="ane-login__title">Login Admin</h2>
-        <p class="ane-login__meta">Masuk untuk mengakses backoffice Jalanyata.</p>
+        <p class="ane-login__meta">Masuk untuk mengakses backoffice <?= htmlspecialchars((string) $companyName, ENT_QUOTES, 'UTF-8') ?>.</p>
 
         <?php jalanyata_flash_render('login_error', 'danger'); ?>
 
