@@ -60,7 +60,7 @@ if (is_readable($stylesheetFile)) {
 <body class="<?= htmlspecialchars($bodyClass) ?>">
     <header class="ane-topbar<?= $isAdminLayout ? '' : ' ane-topbar--public' ?>">
         <div class="ane-topbar__inner">
-            <a href="<?= htmlspecialchars(app_url()) ?>" class="ane-logo">
+            <a href="<?= htmlspecialchars(app_path_url('/')) ?>" class="ane-logo">
                 <?php if (!empty($companyLogoUrl)): ?>
                     <img src="<?= htmlspecialchars($companyLogoUrl) ?>" alt="<?= htmlspecialchars($companyName) ?>" class="ane-logo__image">
                 <?php else: ?>
@@ -74,7 +74,7 @@ if (is_readable($stylesheetFile)) {
                     <a href="<?= htmlspecialchars($dashboardUrl) ?>" class="ane-topbar__link">Dashboard</a>
                     <a href="<?= htmlspecialchars(app_path_url('/logout.php')) ?>" class="ane-topbar__link">Logout</a>
                 <?php else: ?>
-                    <a href="<?= htmlspecialchars(app_url()) ?>" class="ane-topbar__link">Cek Produk</a>
+                    <a href="<?= htmlspecialchars(app_path_url('/')) ?>" class="ane-topbar__link">Cek Produk</a>
                     <a href="<?= htmlspecialchars(app_path_url('/login')) ?>" class="ane-topbar__link">Login</a>
                 <?php endif; ?>
             </nav>

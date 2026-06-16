@@ -48,7 +48,7 @@ if (!function_exists('jalanyata_upload_directory')) {
 if (!function_exists('jalanyata_upload_public_url')) {
     function jalanyata_upload_public_url($fileName)
     {
-        return app_url('/uploads/' . ltrim((string) $fileName, '/'));
+        return app_path_url('/uploads/' . ltrim((string) $fileName, '/'));
     }
 }
 
