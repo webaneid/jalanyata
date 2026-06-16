@@ -25,6 +25,12 @@ $companyLogoUrl = $layoutContext['companyLogoUrl'];
 $frontendTemplateKey = $layoutContext['frontendTemplateKey'];
 $frontendTemplateName = $layoutContext['frontendTemplateName'];
 $frontendTemplateConfig = $layoutContext['frontendTemplateConfig'];
+$stylesheetFile = dirname(__DIR__) . $layoutStylesheet;
+$stylesheetUrl = app_path_url($layoutStylesheet);
+
+if (is_readable($stylesheetFile)) {
+    $stylesheetUrl .= '?v=' . filemtime($stylesheetFile);
+}
 
 ?>
 <!DOCTYPE html>
@@ -45,7 +51,7 @@ $frontendTemplateConfig = $layoutContext['frontendTemplateConfig'];
     <?php if (!empty($companyLogoUrl)): ?>
     <link rel="icon" type="image/png" href="<?= htmlspecialchars($companyLogoUrl) ?>">
     <?php endif; ?>
-    <link rel="stylesheet" href="<?= htmlspecialchars(app_path_url($layoutStylesheet)) ?>">
+    <link rel="stylesheet" href="<?= htmlspecialchars($stylesheetUrl) ?>">
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap');
