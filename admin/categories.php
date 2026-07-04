@@ -51,8 +51,8 @@ try {
                 jalanyata_redirect('/admin/categories.php');
             }
 
-            if (jalanyata_category_usage_count($conn, $categoryId) > 0) {
-                jalanyata_flash_set('category_error', 'Kategori masih dipakai oleh data foto produk.');
+            if (jalanyata_category_has_children($conn, $categoryId)) {
+                jalanyata_flash_set('category_error', 'Kategori masih punya ukuran/foto terkait, jadi tidak bisa dihapus.');
                 jalanyata_redirect('/admin/categories.php');
             }
 
@@ -116,20 +116,25 @@ require_once __DIR__ . '/../includes/header.php';
                 </thead>
                 <tbody>
                     <?php foreach ($categories as $category): ?>
+                        <?php $usageCount = (int) ($category['product_photo_count'] ?? 0); ?>
                         <tr
                             data-id="<?= (int) $category['id'] ?>"
                             data-name="<?= htmlspecialchars((string) $category['name'], ENT_QUOTES, 'UTF-8') ?>"
                         >
                             <td><?= htmlspecialchars((string) $category['name'], ENT_QUOTES, 'UTF-8') ?></td>
-                            <td><?= (int) ($category['product_photo_count'] ?? 0) ?> foto</td>
+                            <td><?= $usageCount ?> ukuran/foto</td>
                             <td>
                                 <div class="ane-table-actions">
                                     <button type="button" onclick="editCategory(this)" class="ane-link ane-link-button">Edit</button>
-                                    <form action="<?= htmlspecialchars(app_path_url('/admin/categories.php'), ENT_QUOTES, 'UTF-8') ?>" method="POST" class="ane-inline-form" onsubmit="return confirm('Apakah Anda yakin ingin menghapus kategori ini?');">
-                                        <input type="hidden" name="action" value="delete">
-                                        <input type="hidden" name="id" value="<?= (int) $category['id'] ?>">
-                                        <button type="submit" class="ane-link ane-link-button ane-link-button--danger">Hapus</button>
-                                    </form>
+                                    <?php if ($usageCount > 0): ?>
+                                        <button type="button" class="ane-link ane-link-button ane-link-button--danger" disabled title="Kategori ini masih dipakai oleh ukuran/foto produk.">Hapus</button>
+                                    <?php else: ?>
+                                        <form action="<?= htmlspecialchars(app_path_url('/admin/categories.php'), ENT_QUOTES, 'UTF-8') ?>" method="POST" class="ane-inline-form" onsubmit="return confirm('Apakah Anda yakin ingin menghapus kategori ini?');">
+                                            <input type="hidden" name="action" value="delete">
+                                            <input type="hidden" name="id" value="<?= (int) $category['id'] ?>">
+                                            <button type="submit" class="ane-link ane-link-button ane-link-button--danger">Hapus</button>
+                                        </form>
+                                    <?php endif; ?>
                                 </div>
                             </td>
                         </tr>

@@ -133,6 +133,13 @@ if (!function_exists('jalanyata_category_usage_count')) {
     }
 }
 
+if (!function_exists('jalanyata_category_has_children')) {
+    function jalanyata_category_has_children(PDO $conn, $categoryId)
+    {
+        return jalanyata_category_usage_count($conn, $categoryId) > 0;
+    }
+}
+
 if (!function_exists('jalanyata_delete_category')) {
     function jalanyata_delete_category(PDO $conn, $categoryId)
     {
@@ -142,7 +149,7 @@ if (!function_exists('jalanyata_delete_category')) {
             return false;
         }
 
-        if (jalanyata_category_usage_count($conn, $categoryId) > 0) {
+        if (jalanyata_category_has_children($conn, $categoryId)) {
             return false;
         }
 
