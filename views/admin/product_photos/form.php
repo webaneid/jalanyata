@@ -23,6 +23,7 @@
                 <button type="button" id="open-category-modal" class="ane-button ane-button--secondary ane-button--compact">Tambah</button>
             </div>
             <p class="ane-note">Kalau kategori belum ada, tambahkan langsung dari sini.</p>
+            <a href="<?= htmlspecialchars(app_path_url('/admin/categories.php'), ENT_QUOTES, 'UTF-8') ?>" class="ane-link">Kelola kategori lengkap</a>
         </div>
         <div class="ane-field">
             <label for="kodeukuran" class="ane-label">Kode Ukuran</label>

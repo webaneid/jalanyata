@@ -23,6 +23,11 @@ $adminLinks = [
         'match' => ['/admin/product_photos.php'],
     ],
     [
+        'label' => 'Kategori',
+        'href' => app_path_url('/admin/categories.php'),
+        'match' => ['/admin/categories.php'],
+    ],
+    [
         'label' => 'Perusahaan',
         'href' => app_path_url('/admin/company.php'),
         'match' => ['/admin/company.php'],

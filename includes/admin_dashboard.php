@@ -36,6 +36,7 @@ if (!function_exists('jalanyata_dashboard_shortcut_links')) {
             ['/admin/products.php', 'Kelola Produk', 'Tambah, edit, atau hapus data produk.'],
             ['/admin/users.php', 'Kelola User', 'Tambah atau edit akun admin.'],
             ['/admin/upload_excel.php', 'Upload Data Produk', 'Import data produk dari file Excel.'],
+            ['/admin/categories.php', 'Kelola Kategori', 'Atur kategori Gold, Silver, dan kategori lain.'],
             ['/admin/company.php', 'Kelola Perusahaan', 'Atur data dan logo perusahaan.'],
             ['/admin/frontend.php', 'Kelola Front-end', 'Atur template dan copy tampilan publik.'],
             ['/admin/product_photos.php', 'Kelola Foto Produk', 'Atur foto produk berdasarkan kategori dan ukuran.'],
